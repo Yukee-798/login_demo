@@ -12,8 +12,12 @@ const PhoneLoginForm = () => {
     const [isInvalidPhoneNumber, setIsInvalidPhoneNumber] = useState(false);
     const [isEmptyPhoneNumber, setIsEmptyPhoneNumber] = useState(false);
     const [isEmptyCaptcha, setIsEmptyCaptcha] = useState(false);
-    const [isPhoneInputOnBlur, setIsPhoneInputOnBlur] = useState(true)
-    const [isCaptchaInputOnBlur, setIsCaptchaInputOnBlur] = useState(true)
+
+
+    // const [isPhoneInputOnBlur, setIsPhoneInputOnBlur] = useState(true)
+    // const [isCaptchaInputOnBlur, setIsCaptchaInputOnBlur] = useState(true)
+
+    let phoneNumber = '';
 
 
 
@@ -32,17 +36,20 @@ const PhoneLoginForm = () => {
 
 
 
+    // 将表单填入的信息提交
     const onFinish = (values) => {
-        console.log('表单提交的values:' + values);
+        console.log('表单提交的values:', values);
     }
 
 
     // 每次 PhoneInput 改变的时候回调该方法用于检测手机号格式
     const checkPhone = (_, value) => {
-        // 如果 PhoneInput 失去焦点并且 手机号不合法时，提醒：'请输入正确的手机号'
-        // 即 return Promise.reject('请输入正确的手机号');
-        console.log(value);
-        // 如果 PhoneInput 失去焦点并且 手机号合法时，返回 Promise.resolve()
+
+        const  reg = /^1[3-9][0-9]{9}$/g;
+        phoneNumber = value.phoneNumber;
+
+        setIsInvalidPhoneNumber(!reg.test(phoneNumber));
+
 
         return Promise.resolve();
     }
@@ -57,7 +64,8 @@ const PhoneLoginForm = () => {
                 phone: {
                     selectValue: '+86',
                     phoneNumber: ''
-                }
+                },
+                captcha: {}
             }}
         >
             <Form.Item
@@ -73,14 +81,6 @@ const PhoneLoginForm = () => {
                     {
                         validator: checkPhone
                     }
-                    // {
-                    //     required: true,
-                    //     message: '请输入手机号!',
-                    // },
-                    // {
-                    //     pattern: /^1\d{10}$/,
-                    //     message: '不合法的手机号格式!',
-                    // },
                 ]}
                 help={
                     isEmptyPhoneNumber ? <EmptyPhoneNumber /> :
@@ -104,15 +104,15 @@ const PhoneLoginForm = () => {
                     <></>
                 }
             >
-                <CaptchaInput />
+                <CaptchaInput isInValidPhoneNumber={isInvalidPhoneNumber}/>
             </Form.Item>
 
            
 
             <Form.Item 
-                className='phone-login-form-item primary-button'
+                className='phone-login-form-item primary-button-item'
             >
-                <Button type='primary' style={{ width: '100%' }}>登录</Button>
+                <Button className='primary-button' type='primary' htmlType='submit' style={{ width: '100%' }}>登录 / 注册</Button>
             </Form.Item>
         </Form>
     )

@@ -48,7 +48,6 @@ const PhoneInput = ({ value = {}, onChange }) => {
     // 监听 phoneNumber 变化
     const onPhoneNumberChange = (e) => {
         const newPhoneNumber = e.target.value;
-        console.log(newPhoneNumber);
         setPhoneNumber(newPhoneNumber);
         triggerChange({
             phoneNumber: newPhoneNumber

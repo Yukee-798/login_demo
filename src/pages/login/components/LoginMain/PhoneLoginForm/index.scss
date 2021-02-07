@@ -15,6 +15,19 @@
         width: 320px;
         height: 36px;
         // margin-bottom: 40px;
+
+    }
+
+    .primary-button-item {
+        margin-bottom: 10px;
+        .primary-button {
+            border-radius: 5px;
+            height: 36px;
+            &:hover {
+                background-color: darken(#2DB55D, 10%);
+                border-color: darken(#2DB55D, 10%);
+            }
+        }
     }
 }
 
