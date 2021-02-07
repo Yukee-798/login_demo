@@ -1,58 +1,64 @@
-import { message, Card, Form, Button } from 'antd';
-import React, { useRef, useState } from 'react';
+import { Form, Button } from 'antd';
+import React from 'react';
 import PhoneInput from './PhoneInput'
 import CaptchaInput from './CaptchaInput'
 
 import { InvalidPhoneNumber, EmptyPhoneNumber, EmptyCaptcha} from './ErrorInfo'
 import './index.scss'
+import { useDispatch, useSelector } from 'react-redux';
+
+import {breakDefault, keepDefault} from '../../../store/actions/phoneLoginForm.js'
+
 
 const PhoneLoginForm = () => {
     const [form] = Form.useForm();
 
-    const [isInvalidPhoneNumber, setIsInvalidPhoneNumber] = useState(false);
-    const [isEmptyPhoneNumber, setIsEmptyPhoneNumber] = useState(false);
-    const [isEmptyCaptcha, setIsEmptyCaptcha] = useState(false);
+
+    const {
+            isKeepDefault, 
+            isInValidPhoneNumber, 
+            isPhoneEmpty, 
+            isCaptchaEmpty, 
+            isPhoneInputOnBlur
+        } = useSelector(allStates => ({
+        isKeepDefault: allStates.phoneLoginForm.isKeepDefault,
+        isInValidPhoneNumber: allStates.phoneInput.isInvalid,
+        isPhoneEmpty: allStates.phoneInput.isEmpty,
+        isCaptchaEmpty: allStates.captchaInput.isEmpty,
+        isPhoneInputOnBlur: allStates.phoneInput.isOnBlur
+    }))
 
 
-    // const [isPhoneInputOnBlur, setIsPhoneInputOnBlur] = useState(true)
-    // const [isCaptchaInputOnBlur, setIsCaptchaInputOnBlur] = useState(true)
-
-    let phoneNumber = '';
+    const dispacth = useDispatch()
 
 
 
     /* 
-        待完成：
-            
-            1. 建议看一下 useContext 和 useMemo
-            2. 处理以下 Error 提醒的逻辑
-                (1) 实时获取 PhoneLoginInput 和 CaptchaInput 输入的内容
-                        * 当输入内容均为空，并且点击了 Primary Btn 则 isEmpty = true
-                        * 当 PhoneLoginInput 为错误号码，并且点击了 Primary Btn 则 isValidPhoneNumber = true
-    
+
+        需求：
+            1. 用户在输入完手机号，并且失去该输入框焦点的时候，检测输入的手机号是否正确
+                * 正确的手机号需要将输入框的背景变淡蓝色，并且使获取验证码的按钮解除 disabled
+                * 输入错误的时候提示：error
+                    * 用户再次进行输入的时候取消 error 保持默认状态
+                
+            2. 用户在点击按钮的检测手机号输入框和验证码输入框是否为空
+                * 如果为空提示：error
+
+
     
     
     */
 
 
-
     // 将表单填入的信息提交
     const onFinish = (values) => {
+        
         console.log('表单提交的values:', values);
+
     }
 
 
-    // 每次 PhoneInput 改变的时候回调该方法用于检测手机号格式
-    const checkPhone = (_, value) => {
 
-        const  reg = /^1[3-9][0-9]{9}$/g;
-        phoneNumber = value.phoneNumber;
-
-        setIsInvalidPhoneNumber(!reg.test(phoneNumber));
-
-
-        return Promise.resolve();
-    }
 
     return (
         <Form 
@@ -65,26 +71,24 @@ const PhoneLoginForm = () => {
                     selectValue: '+86',
                     phoneNumber: ''
                 },
-                captcha: {}
+                captcha: {
+                    captchaValue: ''
+                }
             }}
         >
             <Form.Item
                 style={
-                    isEmptyPhoneNumber ? {marginBottom: '40px'} :
-                    isInvalidPhoneNumber ? {marginBottom: '40px'} :
-                    {marginBottom: '24px'}
+                    isKeepDefault ? { marginBottom: '24px'/* , backgroundColor: '#E8F0FE' */} :
+                    isPhoneEmpty ? {marginBottom: '40px'} :
+                    isInValidPhoneNumber ? {marginBottom: '40px'} :
+                    {marginBottom: '24px'/* , backgroundColor: '#E8F0FE' */}
                 }
                 className='phone-login-form-item phone-input-item'
                 name='phone'
-                
-                rules={[
-                    {
-                        validator: checkPhone
-                    }
-                ]}
                 help={
-                    isEmptyPhoneNumber ? <EmptyPhoneNumber /> :
-                    isInvalidPhoneNumber ? <InvalidPhoneNumber /> :
+                    isKeepDefault ? <></> :
+                    isPhoneEmpty ? <EmptyPhoneNumber /> :
+                    isInValidPhoneNumber ? <InvalidPhoneNumber /> :
                     <></>
                 }              
             >
@@ -95,16 +99,18 @@ const PhoneLoginForm = () => {
 
             <Form.Item
                 style={
-                    isEmptyCaptcha ? { marginBottom: '40px' } : { marginBottom: '24px' }
+                    isKeepDefault ? { marginBottom: '24px' } : 
+                    isCaptchaEmpty ? { marginBottom: '40px' } : { marginBottom: '24px' }
                 }
                 className='phone-login-form-item captcha-input-item'
                 name="captcha"
                 help={
-                    isEmptyCaptcha ? <EmptyCaptcha /> :
+                    isKeepDefault ? <></> :
+                    isCaptchaEmpty ? <EmptyCaptcha /> :
                     <></>
                 }
             >
-                <CaptchaInput isInValidPhoneNumber={isInvalidPhoneNumber}/>
+                <CaptchaInput />
             </Form.Item>
 
            

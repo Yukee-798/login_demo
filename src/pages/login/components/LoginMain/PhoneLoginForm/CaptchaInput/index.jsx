@@ -1,45 +1,69 @@
 import { Input, Button } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { 
+    beEmptyCaptcha, 
+    notBeEmptyCaptcha, 
+    loading, 
+    cancelLoading, 
+    countDown, 
+    countDownEnd,
+    onCaptchaChange
+} from '../../../../store/actions/captchaInput'
 import './index.scss'
 
 
-/* 
-    实现思路：
-        1. Phone
+
+const CaptchaInput = ({ onChange, value = {} }) => {
+    const dispacth = useDispatch();
+
+    const {captchaValue, isKeepDefault, isInvalid} = useSelector(allStates => ({
+        isKeepDefault: allStates.phoneLoginForm.isKeepDefault,
+        isInvalid: allStates.phoneInput.isInvalid,
+        captchaValue: allStates.captchaInput.value
+    }))
 
 
 
-*/
+    const defOnChange = (e) => {
+        const captchaValue = e.target.value;
+        dispacth(onCaptchaChange(captchaValue));   
+        triggerChange({
+            captchaValue
+        });
+
+        const isEmpty = captchaValue === '';
+        if (isEmpty) dispacth(beEmptyCaptcha());
+        else dispacth(notBeEmptyCaptcha());
+    }
 
 
-const CaptchaInput = (props) => {
-    const { isInValidPhoneNumber} = props;
-
-
-
-    console.log(isInValidPhoneNumber);
-    useEffect(() => {
-        
-
-        return () => {
-            
-        };
-    }, []);
+    // 让当前控件 onChange 的时候与 Form.Item 产生交互
+    const triggerChange = (changedValue) => {
+        if (onChange) {
+            onChange({
+                captchaValue,
+                ...value,
+                ...changedValue
+            });
+        }
+    };
 
 
 
     return (
         <Input className='captcha-input'
-            placeholder='验证码' 
+            placeholder='验证码'
+            onChange={defOnChange}
             suffix={
-                <Button 
-                    type='link' 
+                <Button
+                    type='link'
                     loading={false}
-                    disabled={isInValidPhoneNumber}
+                    disabled={isKeepDefault || isInvalid}
                 >
                     获取验证码
                 </Button>
-            } 
+            }
         />
     )
 }

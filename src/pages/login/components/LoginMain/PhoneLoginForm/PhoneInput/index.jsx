@@ -1,24 +1,34 @@
 import { Input, Select,  } from 'antd'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+
 import { DownOutlined } from '@ant-design/icons';
+
+import {
+    beInvalidNumber,
+    notBeInvalidNumber,
+    beEmptyNumber,
+    notBeEmptyNumber,
+    beOnBlur,
+    notBeOnBlur,
+    onPhoneChange,
+    onSelectChange
+}  from '../../../../store/actions/phoneInput'
+
 import './index.scss'
 const { Option } = Select;
 
-const PhoneInput = ({ value = {}, onChange }) => {
-
-    // 被选中的号码前缀
-    const [selectValue, setSelectValue] = useState('+86');
-
-    // 输入的号码
-    const [phoneNumber, setPhoneNumber] = useState('');
-
+const PhoneInput = ({onChange, value = {}}) => {
+    
+    const dispatch = useDispatch();
 
     const [isSelectMouseEnter, setIsSelectMouseEnter] = useState(false);
-    const [isOpened, setIsOpened] = useState(false)
+    const [isOpened, setIsOpened] = useState(false);
 
-    const phoneInputRef = useRef();
-    const selectRef = useRef();
-
+    const {phoneNumber, selectValue} = useSelector(allStates => ({
+        phoneNumber: allStates.phoneInput.inputValue,
+        selectValue: allStates.phoneInput.selectValue
+    }));
 
     // 让当前控件 onChange 的时候与 Form.Item 产生交互
     const triggerChange = (changedValue) => {
@@ -32,45 +42,54 @@ const PhoneInput = ({ value = {}, onChange }) => {
         }
     };
 
-    // 监控 Select 的变化
-    const onSelectValueChange = (e) => {
 
-        const newSelectValue = e;
-        setSelectValue(newSelectValue);
+   
 
-        console.log(e);
-        triggerChange({
-            selectValue: newSelectValue,
-        });
-    };
+    const defOnChange = (e) => {
+        
+        // 如果是 Select 改变
+        if (typeof e === 'string') {
+            const selectValue = e;
+            dispatch(onSelectChange(selectValue));
+            triggerChange({
+                selectValue
+            });
+        } else {
+            // 如果是 Input 改变
+            const phoneNumber = e.target.value;
+
+            // 更新 value
+            dispatch(onPhoneChange(phoneNumber));
+
+            // isInvalid
+            const isInvalid = !/^1[3-9][0-9]{9}$/g.test(phoneNumber);
+            if (isInvalid) dispatch(beInvalidNumber());
+            else dispatch(notBeInvalidNumber());
+
+            // isEmpty
+            const isEmpty = phoneNumber === '';
+            if (isEmpty) dispatch(beEmptyNumber());
+            else dispatch(notBeEmptyNumber());
+
+            triggerChange({
+                phoneNumber
+            });
+        }
+    }
 
 
-    // 监听 phoneNumber 变化
-    const onPhoneNumberChange = (e) => {
-        const newPhoneNumber = e.target.value;
-        setPhoneNumber(newPhoneNumber);
-        triggerChange({
-            phoneNumber: newPhoneNumber
-        });
-    };
-
-
-
-
-
-
-    // const handleSelectonChange = () => {
-    //     console.log('select失去焦点');
-
-    //     if (isOpened) {
-    //         selectRef.current.focus()
-    //         console.log('select获取焦点');
-    //     }
-    // }
     return (
         <>
             <Input
                 className='phone-input'
+                placeholder="输入手机号"
+                type='tel'
+                onChange={defOnChange}
+
+                onFocus={() => dispatch(notBeOnBlur())}
+                onBlur={() => dispatch(beOnBlur())}
+                
+
                 prefix={
                     <Select
                         bordered={false}
@@ -83,18 +102,16 @@ const PhoneInput = ({ value = {}, onChange }) => {
                                                 paddingRight: '3px', fontSize: '10px', 
                                                 color: isSelectMouseEnter ? '#2DB55D' : '#D9D9D9'}} 
                                     />}
-                        ref={selectRef}
                         onMouseEnter={() => setIsSelectMouseEnter(true)}
                         onMouseLeave={() => setIsSelectMouseEnter(false)}
 
                         // 处理下拉框是否展开
                         onClick={() => setIsOpened(!isOpened)}
+                        onChange={defOnChange}
 
                         open={isOpened}
                         // options={options}   用 options 属性替换 Option 组件性能更好
 
-                        onChange={onSelectValueChange}
-                        // onChange={handleSelectonChange}
                         optionLabelProp='value'
                     
                         dropdownMatchSelectWidth={false}
@@ -121,11 +138,6 @@ const PhoneInput = ({ value = {}, onChange }) => {
                         <Option key='18' value='+91'>印度(+91)</Option>
                     </Select>
                 }
-                style={{ width: '100%' }}
-                placeholder="输入手机号"
-                ref={phoneInputRef}
-                onChange={onPhoneNumberChange}
-                type='tel'
             />
         </>
     )
