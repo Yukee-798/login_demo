@@ -6,9 +6,14 @@ import {
     BE_ON_BLUR,
     NOT_BE_ON_BLUR,
     ON_PHONE_CHANGE,
-    ON_SELECT_CHANGE
+    ON_SELECT_CHANGE,
+    KEEP_PHONE_DEFAULT,
+    BREAK_PHONE_DEFAULT
 } from '../constant'
 
+
+export const keepPhoneDefault = data => ({type: KEEP_PHONE_DEFAULT, data});
+export const breakPhoneDefault = data => ({type: BREAK_PHONE_DEFAULT, data});
 export const beInvalidNumber = data => ({type: BE_INVALID_NUMBER, data});
 export const notBeInvalidNumber = data => ({type: NOT_BE_INVALID_NUMBER, data});
 export const beEmptyNumber = data => ({type: BE_EMPTY_NUMBER, data});

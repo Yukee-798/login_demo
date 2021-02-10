@@ -6,10 +6,13 @@ import {
     BE_ON_BLUR,
     NOT_BE_ON_BLUR,
     ON_PHONE_CHANGE,
-    ON_SELECT_CHANGE
+    ON_SELECT_CHANGE,
+    KEEP_PHONE_DEFAULT,
+    BREAK_PHONE_DEFAULT
 } from '../constant'
 
 const initState = {
+    isKeepDefault: true,
     isEmpty: true, 
     isInvalid: true, 
     isOnBlur: true, 
@@ -20,6 +23,10 @@ const initState = {
 export default function phoneInput(state = initState, action) {
     const {type, data} = action;
     switch (type) {
+        case KEEP_PHONE_DEFAULT: 
+            return {...state, isKeepDefault: true};
+        case BREAK_PHONE_DEFAULT:
+            return {...state, isKeepDefault: false};
         case BE_EMPTY_NUMBER: 
             return {...state, isEmpty: true};
         case NOT_BE_EMPTY_NUMBER:
@@ -37,6 +44,6 @@ export default function phoneInput(state = initState, action) {
         case ON_SELECT_CHANGE:
             return {...state, selectValue: data};
         default:
-            return initState;
+            return state;
     }
 }

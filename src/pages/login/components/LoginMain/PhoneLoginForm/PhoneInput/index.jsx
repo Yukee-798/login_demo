@@ -1,6 +1,6 @@
 import { Input, Select,  } from 'antd'
-import { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
+import { useCallback, useState } from 'react'
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 
 import { DownOutlined } from '@ant-design/icons';
 
@@ -9,29 +9,31 @@ import {
     notBeInvalidNumber,
     beEmptyNumber,
     notBeEmptyNumber,
-    beOnBlur,
     notBeOnBlur,
     onPhoneChange,
-    onSelectChange
+    onSelectChange,
+    keepPhoneDefault,
+    breakPhoneDefault
 }  from '../../../../store/actions/phoneInput'
-
 import './index.scss'
+
 const { Option } = Select;
 
 const PhoneInput = ({onChange, value = {}}) => {
-    
     const dispatch = useDispatch();
 
     const [isSelectMouseEnter, setIsSelectMouseEnter] = useState(false);
     const [isOpened, setIsOpened] = useState(false);
 
-    const {phoneNumber, selectValue} = useSelector(allStates => ({
-        phoneNumber: allStates.phoneInput.inputValue,
-        selectValue: allStates.phoneInput.selectValue
-    }));
+
+    const phoneNumber = useSelector(allStates => allStates.phoneInput.inputValue, shallowEqual);
+    const selectValue = useSelector(allStates => allStates.phoneInput.selectValue, shallowEqual);
+
+
+  
 
     // 让当前控件 onChange 的时候与 Form.Item 产生交互
-    const triggerChange = (changedValue) => {
+    const triggerChange = useCallback((changedValue) => {
         if (onChange) {
             onChange({
                 phoneNumber,
@@ -40,13 +42,13 @@ const PhoneInput = ({onChange, value = {}}) => {
                 ...changedValue
             });
         }
-    };
+    }, [onChange, phoneNumber, selectValue, value]);
 
 
    
-
-    const defOnChange = (e) => {
-        
+    // console.log(phoneNumber);
+    const defOnChange = useCallback((e) => {
+        dispatch(keepPhoneDefault());
         // 如果是 Select 改变
         if (typeof e === 'string') {
             const selectValue = e;
@@ -75,8 +77,13 @@ const PhoneInput = ({onChange, value = {}}) => {
                 phoneNumber
             });
         }
-    }
+    }, [dispatch, triggerChange])
 
+
+    const onBlur = () => {
+        dispatch(breakPhoneDefault());
+        
+    }
 
     return (
         <>
@@ -87,7 +94,7 @@ const PhoneInput = ({onChange, value = {}}) => {
                 onChange={defOnChange}
 
                 onFocus={() => dispatch(notBeOnBlur())}
-                onBlur={() => dispatch(beOnBlur())}
+                onBlur={onBlur}
                 
 
                 prefix={

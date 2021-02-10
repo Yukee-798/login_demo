@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Card, Button } from 'antd';
 import PhoneLoginForm from './PhoneLoginForm'
+import PwdLoginForm from './PwdLoginForm'
 import { CaretRightOutlined} from '@ant-design/icons'
 
 import './index.scss'
@@ -19,7 +20,9 @@ const LoginMain = (props) => {
             title={isPhoneLogin ? '欢迎使用力扣' : '账号密码登录'}
             bordered={false}
         >
-            <PhoneLoginForm />
+
+            {isPhoneLogin ? <PhoneLoginForm /> : <PwdLoginForm />}
+            
 
 
             <div className='link-button-warp'>

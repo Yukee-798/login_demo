@@ -1,5 +1,5 @@
 import { Input, Button } from 'antd';
-import { useEffect, useRef } from 'react';
+import { useCallback, shallowEqual, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
     beEmptyCaptcha, 
@@ -8,7 +8,8 @@ import {
     cancelLoading, 
     countDown, 
     countDownEnd,
-    onCaptchaChange
+    onCaptchaChange,
+    keepCaptchaDefault
 } from '../../../../store/actions/captchaInput'
 import './index.scss'
 
@@ -17,16 +18,29 @@ import './index.scss'
 const CaptchaInput = ({ onChange, value = {} }) => {
     const dispacth = useDispatch();
 
-    const {captchaValue, isKeepDefault, isInvalid} = useSelector(allStates => ({
-        isKeepDefault: allStates.phoneLoginForm.isKeepDefault,
-        isInvalid: allStates.phoneInput.isInvalid,
-        captchaValue: allStates.captchaInput.value
-    }))
+
+    const captchaValue = useSelector(allStates => allStates.captchaInput.value, shallowEqual);
+    const isInvalid = useSelector(allStates => allStates.phoneInput.isInvalid, shallowEqual);
+    const isLoading = useSelector(allStates => allStates.captchaInput.isLoading, shallowEqual);
+    const isCountDown = useSelector(allStates => allStates.captchaInput.isCountDown, shallowEqual);
+    const [seconds, setSeconds] = useState(5);
 
 
 
-    const defOnChange = (e) => {
+    // 让当前控件 onChange 的时候与 Form.Item 产生交互
+    const triggerChange = useCallback((changedValue) => {
+        if (onChange) {
+            onChange({
+                captchaValue,
+                ...value,
+                ...changedValue
+            });
+        }
+    }, [captchaValue, value, onChange]);
+
+    const defOnChange = useCallback((e) => {
         const captchaValue = e.target.value;
+        dispacth(keepCaptchaDefault());
         dispacth(onCaptchaChange(captchaValue));   
         triggerChange({
             captchaValue
@@ -35,21 +49,33 @@ const CaptchaInput = ({ onChange, value = {} }) => {
         const isEmpty = captchaValue === '';
         if (isEmpty) dispacth(beEmptyCaptcha());
         else dispacth(notBeEmptyCaptcha());
+    }, [dispacth, triggerChange]);
+
+
+    const startCountDown = () => {
+        dispacth(countDown())
+        let minite = 5;
+        let timer = setInterval(() => {
+
+            if (minite <= 1) {
+                dispacth(countDownEnd());
+                clearInterval(timer);
+            }
+            minite -= 1;
+            setSeconds(minite);
+        }, 1000);
     }
 
+    const handleClick = () => {
+        dispacth(loading());
+        setSeconds(5);
+        setTimeout(() => {
+            dispacth(cancelLoading());
+            startCountDown();
+        }, 500);
+    }
 
-    // 让当前控件 onChange 的时候与 Form.Item 产生交互
-    const triggerChange = (changedValue) => {
-        if (onChange) {
-            onChange({
-                captchaValue,
-                ...value,
-                ...changedValue
-            });
-        }
-    };
-
-
+    
 
     return (
         <Input className='captcha-input'
@@ -58,10 +84,14 @@ const CaptchaInput = ({ onChange, value = {} }) => {
             suffix={
                 <Button
                     type='link'
-                    loading={false}
-                    disabled={isKeepDefault || isInvalid}
+                    loading={isLoading}
+                    disabled={isInvalid || isLoading || isCountDown}
+                    onClick={handleClick}
                 >
-                    获取验证码
+                    {
+                        isLoading ? '发送中' : 
+                        isCountDown ? seconds + ' 秒后可重发' : '获取验证码'
+                    }
                 </Button>
             }
         />

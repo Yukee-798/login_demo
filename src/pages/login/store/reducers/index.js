@@ -1,15 +1,13 @@
 import {combineReducers} from 'redux'
-import loginMain from './loginMain'
-import phoneLoginForm from './phoneLoginForm'
 import phoneInput from './phoneInput'
 import captchaInput from './captchaInput'
+import pwdLoginForm from './pwdLoginForm'
 
 export default combineReducers(
     {
         // loginMain,
         phoneInput,
         captchaInput,
-        phoneLoginForm
-
+        pwdLoginForm
     }
 )

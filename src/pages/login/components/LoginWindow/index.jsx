@@ -8,7 +8,7 @@ const LoginWindow = () => {
     return (
         <div 
             className='login-window' 
-            style={isPhoneLogin ? {height: '514px', marginTop: '80px'} : {height: '462px', marginTop: '100px'}}>
+            style={isPhoneLogin ? {minHeight: '514px', marginTop: '80px'} : {minHeight: '462px', marginTop: '100px'}}>
             <LoginMain isPhoneLogin={isPhoneLogin} setIsPhoneLogin={setIsPhoneLogin} />
             <LoginFooter />
         </div>
