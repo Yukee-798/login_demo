@@ -1,5 +1,5 @@
-import { Form, Button } from 'antd';
-import React from 'react';
+import { Form, Button, message } from 'antd';
+import React, { useEffect } from 'react';
 import PhoneInput from './PhoneInput'
 import CaptchaInput from './CaptchaInput'
 
@@ -14,7 +14,7 @@ import { beEmptyNumber, breakPhoneDefault } from '../../../store/actions/phoneIn
 
 
 
-const PhoneLoginForm = () => {
+const PhoneLoginForm = (props) => {
     const [form] = Form.useForm();
 
 
@@ -56,10 +56,14 @@ const PhoneLoginForm = () => {
             dispacth(beEmptyNumber());
         }
 
+        // message.error('验证码错误，请重新验证');
         console.log(values);
     }
 
 
+    // useEffect(() => {
+
+    // }, []);
 
 
     return (
@@ -77,6 +81,7 @@ const PhoneLoginForm = () => {
                     captchaValue: ''
                 }
             }}
+            {...props}
         >
             <Form.Item
                 style={
@@ -119,7 +124,14 @@ const PhoneLoginForm = () => {
             <Form.Item
                 className='phone-login-form-item primary-button-item'
             >
-                <Button className='primary-button' type='primary' htmlType='submit' style={{ width: '100%' }}>登录 / 注册</Button>
+                <Button 
+                    className='primary-button' 
+                    type='primary' 
+                    htmlType='submit' 
+                    style={{ width: '100%' }}
+                >
+                    登录 / 注册
+                </Button>
             </Form.Item>
         </Form>
     )

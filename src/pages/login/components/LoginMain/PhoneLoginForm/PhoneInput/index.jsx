@@ -129,7 +129,6 @@ const PhoneInput = ({onChange, value = {}}) => {
                         <Option key='2' value='+852'>中国香港(+852)</Option>
                         <Option key='3' value='+853'>中国香港(+853)</Option>
                         <Option key='4' value='+886'>中国台湾(+886)</Option>
-                        <Option key='5' value='+1'>加拿大(+1)</Option>
                         <Option key='6' value='+1'>美国(+1)</Option>
                         <Option key='7' value='+33'>法国(+33)</Option>
                         <Option key='8' value='+44'>英国(+44)</Option>

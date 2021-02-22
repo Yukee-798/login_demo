@@ -1,5 +1,5 @@
 import { Input, Button } from 'antd';
-import { useCallback, shallowEqual, useState } from 'react';
+import { useCallback, shallowEqual, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
     beEmptyCaptcha, 
@@ -52,10 +52,11 @@ const CaptchaInput = ({ onChange, value = {} }) => {
     }, [dispacth, triggerChange]);
 
 
+    let timer;
     const startCountDown = () => {
         dispacth(countDown())
         let minite = 5;
-        let timer = setInterval(() => {
+        timer = setInterval(() => {
 
             if (minite <= 1) {
                 dispacth(countDownEnd());
@@ -65,6 +66,7 @@ const CaptchaInput = ({ onChange, value = {} }) => {
             setSeconds(minite);
         }, 1000);
     }
+
 
     const handleClick = () => {
         dispacth(loading());

@@ -1,5 +1,5 @@
 import { Form, Button, Input } from 'antd';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { EmptyUsername, EmptyPassword } from '../ErrorInfo'
 import './index.scss'
@@ -24,7 +24,7 @@ import {
 
 
 
-const PhoneLoginForm = () => {
+const PhoneLoginForm = (props) => {
     const [form] = Form.useForm();
 
 
@@ -33,13 +33,15 @@ const PhoneLoginForm = () => {
     const isInValid = useSelector(state => state.pwdLoginForm.isInvalid, shallowEqual);
     const isUsernameEmpty = useSelector(state => state.pwdLoginForm.isUsernameEmpty, shallowEqual);
     const isPwdEmpty = useSelector(state => state.pwdLoginForm.isPwdEmpty, shallowEqual);
+    const username = useSelector(state => state.pwdLoginForm.username, shallowEqual);
+    const password = useSelector(state => state.pwdLoginForm.password, shallowEqual);
 
     const dispacth = useDispatch()
 
 
     // 将表单填入的信息提交
-    const onFinish = (values) => {
-        const { username, password } = values;
+    const onFinish = () => {
+        // const { username, password } = values;
         if (username === '') {
             dispacth(breakUsernameDefault());
             dispacth(beEmptyUername());
@@ -49,10 +51,41 @@ const PhoneLoginForm = () => {
             dispacth(beEmptyPwd());
         }
 
-        console.log(values);
+        console.log(username, password);
     }
 
+    useEffect(() => {
 
+        return () => {
+        }
+    }, []);
+
+    const listenUsername = e => {
+        dispacth(keepUsernameDefault());
+
+        let username = e.target.value;
+
+        // 更新 username
+        dispacth(onUsernameChange(username));
+
+        // isEmpty
+        const isEmpty = username === '';
+        if (isEmpty) dispacth(beEmptyUername());
+        else dispacth(notBeEmptyUsername());
+    }
+    const listenPassword = e => {
+        dispacth(keepPwdDefault());
+
+        let password = e.target.value;
+
+        // 更新 password
+        dispacth(onPwdChange(password));
+
+        // isEmpty
+        const isEmpty = password === '';
+        if (isEmpty) dispacth(beEmptyPwd());
+        else dispacth(notBeEmptyPwd());
+    }
    
 
 
@@ -62,12 +95,13 @@ const PhoneLoginForm = () => {
         <Form
             className='pwd-login-form'
             name='pwd_login_form'
-            onFinish={onFinish}
+            // onFinish={onFinish}
             form={form}
             initialValues={{
                 username: '',
                 password: ''
             }}
+            {...props}
         >
             <Form.Item
                 className='pwd-login-form-item username-input-item'
@@ -83,7 +117,7 @@ const PhoneLoginForm = () => {
                             <></>
                 }
             >
-                <Input className='username-input' placeholder='手机号 / 邮箱'/* onChange={listenUsername} */ />
+                <Input className='username-input' placeholder='手机号 / 邮箱'onChange={listenUsername} />
             </Form.Item>
 
 
@@ -101,14 +135,19 @@ const PhoneLoginForm = () => {
                             <></>
                 }
             >
-                <Input.Password className='password-input' placeholder='输入密码' /* onChange={listenPassword} */ />
+                <Input.Password className='password-input' placeholder='输入密码' onChange={listenPassword} />
             </Form.Item>
 
 
             <Form.Item
                 className='pwd-login-form-item primary-button-item'
             >
-                <Button className='primary-button' type='primary' htmlType='submit' style={{ width: '100%' }}>登录</Button>
+                <Button 
+                    loading={true}
+                    className='primary-button' 
+                    type='primary' 
+                    onClick={onFinish} 
+                    style={{ width: '100%' }}>登录</Button>
             </Form.Item>
         </Form>
     )
