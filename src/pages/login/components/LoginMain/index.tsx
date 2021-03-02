@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Card, Button } from 'antd';
+import {useHistory} from 'react-router-dom'
 import PhoneLoginForm from './PhoneLoginForm'
 import PwdLoginForm from './PwdLoginForm'
 import { CaretRightOutlined} from '@ant-design/icons'
@@ -7,12 +8,21 @@ import { CaretRightOutlined} from '@ant-design/icons'
 import './index.scss'
 
 
-const LoginMain = (props) => {
+interface IProps {
+    isPhoneLogin: boolean,
+    setIsPhoneLogin: React.Dispatch<React.SetStateAction<boolean>>
+}
 
-    const {isPhoneLogin, setIsPhoneLogin} = props;
 
-    // const isPhoneLogin = false;
+const LoginMain: React.FC<IProps> = ({ isPhoneLogin, setIsPhoneLogin}) => {
 
+    let history = useHistory();
+    const handleClick = () => {
+        
+        if (!isPhoneLogin) {
+            history.push('/resetpassword');
+        }
+    };
 
     return (
         <Card 
@@ -21,7 +31,8 @@ const LoginMain = (props) => {
             bordered={false}
         >
 
-            {isPhoneLogin ? <PhoneLoginForm /> : <PwdLoginForm />}
+            <PhoneLoginForm style={{display: isPhoneLogin ? 'block' : 'none'}} />
+            <PwdLoginForm style={{display: isPhoneLogin ? 'none' : 'block'}} />
             
 
 
@@ -31,7 +42,7 @@ const LoginMain = (props) => {
                 </Button>
 
 
-                <Button className='link-button' type='link'>
+                <Button className='link-button' type='link' onClick={handleClick}>
                     {isPhoneLogin ? '邮箱注册' : '忘记密码'}
                 </Button>
             </div>
@@ -43,4 +54,4 @@ const LoginMain = (props) => {
     )
 }
 
-export default LoginMain
+export default LoginMain;

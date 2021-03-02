@@ -1,7 +1,7 @@
 import { Input, Select,  } from 'antd'
 import { useCallback, useState } from 'react'
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
-
+import { connect } from 'react-redux';
+import { Dispatch } from 'redux'
 import { DownOutlined } from '@ant-design/icons';
 
 import {
@@ -15,76 +15,110 @@ import {
     keepPhoneDefault,
     breakPhoneDefault
 }  from '../../../../store/actions/phoneInput'
+
+import { IRootState } from '../../../../store/reducers';
+
 import './index.scss'
 
 const { Option } = Select;
 
-const PhoneInput = ({onChange, value = {}}) => {
-    const dispatch = useDispatch();
 
+
+interface IMapState {
+    phone: string | undefined;
+    select: string | undefined;
+}
+
+interface IMapDispatch {
+    beInvalidNumber: () => void;
+    notBeInvalidNumber: () => void;
+    beEmptyNumber: () => void;
+    notBeEmptyNumber: () => void;
+    notBeOnBlur: () => void;
+    updatePhone: (value: string) => void;
+    updateSelect: (value: string) => void;
+    breakPhoneDefault: () => void;
+    keepPhoneDefault: () => void;
+}
+
+export interface IPhoneNumber {
+    select: string | undefined;
+    phone: string | undefined;
+}
+
+interface BaseProps extends IMapState, IMapDispatch {
+    children?: React.ReactNode;
+    value?: IPhoneNumber;
+    onChange?: (value: IPhoneNumber) => void;
+}
+
+
+const PhoneInput: React.FC<BaseProps> = (props) => {
+
+    const {onChange, value} = props;
+    
     const [isSelectMouseEnter, setIsSelectMouseEnter] = useState(false);
     const [isOpened, setIsOpened] = useState(false);
 
+    // state
+    const {
+        phone,
+        select
+    } = props;
 
-    const phoneNumber = useSelector(allStates => allStates.phoneInput.inputValue, shallowEqual);
-    const selectValue = useSelector(allStates => allStates.phoneInput.selectValue, shallowEqual);
-
-
-  
+    // dispatch
+    const {
+        beInvalidNumber,
+        notBeInvalidNumber,
+        beEmptyNumber,
+        notBeEmptyNumber,
+        notBeOnBlur,
+        updatePhone,
+        updateSelect,
+        breakPhoneDefault,
+        keepPhoneDefault
+    } = props;
 
     // 让当前控件 onChange 的时候与 Form.Item 产生交互
-    const triggerChange = useCallback((changedValue) => {
-        if (onChange) {
-            onChange({
-                phoneNumber,
-                selectValue,
-                ...value,
-                ...changedValue
-            });
-        }
-    }, [onChange, phoneNumber, selectValue, value]);
+    const triggerChange = (changedValue: IPhoneNumber) => {
+        onChange?.({ phone, select, ...value, ...changedValue });
+    };
 
-
-   
-    // console.log(phoneNumber);
-    const defOnChange = useCallback((e) => {
-        dispatch(keepPhoneDefault());
+    const defOnChange = (e: any) => {
+        keepPhoneDefault();
         // 如果是 Select 改变
         if (typeof e === 'string') {
             const selectValue = e;
-            dispatch(onSelectChange(selectValue));
+            updateSelect(selectValue);
             triggerChange({
-                selectValue
+                phone,
+                select: selectValue
             });
         } else {
             // 如果是 Input 改变
             const phoneNumber = e.target.value;
 
             // 更新 value
-            dispatch(onPhoneChange(phoneNumber));
+            updatePhone(phoneNumber);
 
             // isInvalid
-            const isInvalid = !/^1[3-9][0-9]{9}$/g.test(phoneNumber);
-            if (isInvalid) dispatch(beInvalidNumber());
-            else dispatch(notBeInvalidNumber());
+            const isInvalid = !(/^1[3-9][0-9]{9}$/g.test(phoneNumber)/* ||phoneNumber === '' */);
+            if (isInvalid) beInvalidNumber();
+            else notBeInvalidNumber();
 
             // isEmpty
             const isEmpty = phoneNumber === '';
-            if (isEmpty) dispatch(beEmptyNumber());
-            else dispatch(notBeEmptyNumber());
-
+            if (isEmpty) beEmptyNumber();
+            else notBeEmptyNumber();
             triggerChange({
-                phoneNumber
+                phone: phoneNumber,
+                select
             });
         }
-    }, [dispatch, triggerChange])
+    };
 
 
-    const onBlur = () => {
-        dispatch(breakPhoneDefault());
-        
-    }
-
+ 
     return (
         <>
             <Input
@@ -93,12 +127,12 @@ const PhoneInput = ({onChange, value = {}}) => {
                 type='tel'
                 onChange={defOnChange}
 
-                onFocus={() => dispatch(notBeOnBlur())}
-                onBlur={onBlur}
+                onFocus={() => notBeOnBlur()}
+                onBlur={() => breakPhoneDefault()}
                 
 
                 prefix={
-                    <Select
+                    <Select 
                         bordered={false}
                         className='phone-input-select'
                         defaultValue='+86'
@@ -115,6 +149,7 @@ const PhoneInput = ({onChange, value = {}}) => {
                         // 处理下拉框是否展开
                         onClick={() => setIsOpened(!isOpened)}
                         onChange={defOnChange}
+                        onFocus={() => {console.log(1);}}
 
                         open={isOpened}
                         // options={options}   用 options 属性替换 Option 组件性能更好
@@ -149,4 +184,21 @@ const PhoneInput = ({onChange, value = {}}) => {
     )
 }
 
-export default PhoneInput
+const mapStateToProps = (state: IRootState): IMapState => ({
+    phone: state.phoneInput.phone,
+    select: state.phoneInput.select
+});
+
+const mapDispatchToProps = (dispatch: Dispatch): IMapDispatch => ({
+    beInvalidNumber: () => void dispatch(beInvalidNumber()),
+    notBeInvalidNumber: () => void dispatch(notBeInvalidNumber()),
+    beEmptyNumber: () => void dispatch(beEmptyNumber()),
+    notBeEmptyNumber: () => void dispatch(notBeEmptyNumber()),
+    notBeOnBlur: () => void dispatch(notBeOnBlur()),
+    updatePhone: (value: string) => void dispatch(onPhoneChange(value)),
+    updateSelect: (value: string) => void dispatch(onSelectChange(value)),
+    keepPhoneDefault: () => void keepPhoneDefault(),
+    breakPhoneDefault: () => void breakPhoneDefault()    
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(PhoneInput);
