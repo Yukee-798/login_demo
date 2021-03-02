@@ -3,9 +3,8 @@ import Login from './pages/login/Login'
 
 
 import React from 'react';
-import { message } from 'antd';
-import ProForm, { ProFormText, ProFormCaptcha } from '@ant-design/pro-form';
-import { MobileTwoTone, MailTwoTone } from '@ant-design/icons';
+import ResetPwdWindow from './pages/resetpassword/components/ResetPwdWindow';
+
 
 const waitTime = (time = 100) => {
     return new Promise((resolve) => {
@@ -18,6 +17,7 @@ const waitTime = (time = 100) => {
 const App = () => {
     return (
         <Login />
+        // <ResetPwdWindow />
         // <div
         //     style={{
         //         width: 330,
@@ -88,28 +88,6 @@ const App = () => {
 }
 
 
-
-/* 
-    开发思路：
-        LoginWindow 为整个登录框
-            - LoginMain
-                - title
-                - 两个输入框
-                - primary button
-                - changeLoginWay Btn
-                    点击后改变：
-                        1. title 名称
-                        2. 两个输入框的 display
-                        3. prmary button 名称
-                        4. changeLoginWay Btn 名称 和 email register / forget password 名称
-                        5. 已有美国站账号显示与否
-
-
-                - email register / forget password
-
-            - LoginFooter 静态组件
-
-*/
 
 
 
